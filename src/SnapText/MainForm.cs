@@ -964,12 +964,30 @@ public sealed class ConfirmDialog : Form
 
 public static class AppIcon
 {
-    public static Icon Create(Color accent)
+    /// <summary>Full multi-size icon (window / taskbar).</summary>
+    public static Icon Create(Color accent) => Load(null) ?? Fallback(accent);
+
+    /// <summary>Small-size icon for the notification area.</summary>
+    public static Icon CreateTray(Color accent) => Load(SystemInformation.SmallIconSize) ?? Fallback(accent);
+
+    // icon.ico next to the exe wins (user override / portable folder),
+    // then the icon embedded in the exe, then a drawn fallback.
+    private static Icon? Load(Size? size)
     {
         var icoPath = Path.Combine(AppSettings.AppDir, "icon.ico");
         if (File.Exists(icoPath))
-            try { return new Icon(icoPath); } catch { }
+            try { return size is { } s ? new Icon(icoPath, s) : new Icon(icoPath); } catch { }
+        try
+        {
+            if (Environment.ProcessPath is string exe)
+                return Icon.ExtractAssociatedIcon(exe);
+        }
+        catch { }
+        return null;
+    }
 
+    private static Icon Fallback(Color accent)
+    {
         try
         {
             using var bmp = new Bitmap(32, 32, System.Drawing.Imaging.PixelFormat.Format32bppArgb);

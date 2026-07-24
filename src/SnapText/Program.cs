@@ -62,7 +62,7 @@ sealed class SnapTextContext : ApplicationContext
         var theme = Theme.Resolve(_settings.Theme);
         _tray = new NotifyIcon
         {
-            Icon = AppIcon.Create(theme.Accent),
+            Icon = AppIcon.CreateTray(theme.Accent),
             Text = "SnapText — screen text capture",
             Visible = true,
         };
